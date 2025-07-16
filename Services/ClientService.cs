@@ -56,10 +56,13 @@ namespace IntricomMVC.Services
             }
         }
 
+
+
         public async Task<Client> PostClientAsync(ClientDTO itemDTO)
         {
             try
             {
+                //aquí validamos el tipo de repositorio system file o DAtabase
                 var config = await _context.Configurations.FirstOrDefaultAsync();
                 if (config != null)
                 {
