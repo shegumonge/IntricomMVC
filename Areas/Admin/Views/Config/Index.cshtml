@@ -1,0 +1,158 @@
+﻿@using IntricomMVC.Models
+@using System.Globalization
+@model IEnumerable<IntricomMVC.Models.Configuration>
+@{
+    ViewData["Title"] = "Configuration";
+}
+
+@section Scripts
+{
+    <script type="text/javascript">
+
+        function getItem(id) {
+            $('#myForm').trigger("reset");
+            $("#Id").val(id);
+            if (id > 0) {
+                $.ajax({
+                    url: "/Admin/Config/GetConfiguration",
+                    type: "GET",
+                    data: { id: id },
+                    success: function (data) {
+                        if (!data) return;
+                        $("#DataType").val(data.dataType);
+                        $("#FsFolder").val(data.fsFolder);
+                    }
+                });
+            }//else $("#divCreateDate").hide();
+            $("#cmddialog_editConfig").click();
+        }
+
+        function saveConfig() {
+            var formData = new FormData(document.querySelector('#myForm'))
+            $.ajax({
+                url: '/Admin/Config/SaveConfiguration',
+                async: false,
+                type: "POST",
+                data: formData,
+                processData: false,  // tell jQuery not to process the data
+                contentType: false,  // tell jQuery not to set contentType
+                dataType: 'json',
+                success: function (response) {
+                    if (!response.success) sweetAlert("Oops...", response.message, "error");
+                    else window.location.reload();
+                }
+            });
+        }
+
+    </script>
+
+}
+<h1>Configuration</h1>
+
+<div class="wrapper wrapper-content animated fadeInRight">
+    @if (ViewBag.ShowNewConfiguration)
+    {
+        <div class="row" id="divConfiguration">
+            <div class="col-md-12">
+                <button type="button" class="btn btn-black btn-rounded btn-md w-100 mt-2 mb-2 ml-2 mr-2" onclick="getItem(0);">Configuration</button>
+            </div>
+        </div>
+    }
+    <div class="row">
+        <div class="col-md-12 plr-tab-5">
+            <table id="tabDocuments" class="table table-striped table-hover p-0 m-0 table-rounded">
+                <thead class="h-60">
+                    <tr>
+                        <th class="all"><div class="table-div-header">DataType</div></th>
+                        <th class="desktop hideInMobile"><div class="table-div-header text-center">FsFolder</div></th>
+                        <th class="all" align="right"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                <div class="div-table-row">
+                                    <a class="btn-table-main-col" href="javascript:void(0)" onclick="getItem(@item.Id);"><span class="item-list-name">@item.DataType</span></a>
+                                </div>
+                            </td>
+                            <td class="hideInMobile" align="center">
+                                <div class="div-table-row"><a class="btn-table-main-col" href="javascript:void(0)" onclick="getItem(@item.Id);">@item.FsFolder</a></div>
+                            </td>
+                            <td class=" text-right">
+                                <div class="table-div-switch show">
+                                    <button class="btn btn-default border-none" data-toggle="dropdown"><i class="fa fa-ellipsis-v" aria-hidden="true"></i></button>
+                                    <ul class="dropdown-menu dropdown-menu-right" style="min-width: inherit;">
+                                        <li><a class="dropdown-item" href="javascript:void(0)" onclick="getItem(@item.Id);">Editar</a></li>
+                                        <li class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item" href="javascript:void(0)" onclick="removeItem(@item.Id);">Eliminar</a></li>
+                                        <li class="dropdown-divider"></li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+<button id="cmddialog_editConfig" type="button" class="btn btn-primary" data-toggle="modal" data-target="#dialog_editConfig" style="display:none;"></button>
+<div class="modal custom inmodal fade modal-full" id="dialog_editConfig" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="ibox-content" style="padding:0px !important;border-radius:0px;">
+                    <table class="table table-striped border-none" style="width:100%; margin-bottom:0px !important;">
+                        <tbody class="border-none">
+                            <tr role="row" class="odd">
+                                <td width="80%" class="border-none">
+                                    <div><a class="lnk-header-menuqr" href="javascript:void(0)"><h2><strong>Client</strong></h2></a></div>
+                                </td>
+                                <td class="text-center border-none" width="20%">
+                                    <div class="btn-group" style="float:right;">
+                                        <button type="button" class="btn btn-default font-bold btn-rounded" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-body">
+                <form id="myForm">
+                    <input type="hidden" Class="form-control floting" id="Id" name="Id">
+                    <div class="wrapper wrapper-content animated fadeIn">
+                        <div class="row mt-3 mb-2">
+                            <div class="col-lg-12">
+                                <div class="form-group">
+                                    <label class="active" for="Name">DataType:</label>
+                                    <select class="form-control floting" id="DataType" name="DataType">
+                                        <option value="FS">File System</option>
+                                        <option value="DB">Data Base</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-3 mb-2">
+                            <div class="col-lg-12">
+                                <div class="form-group">
+                                    <label class="active" for="Address">FsFolder:</label>
+                                    <input type="text" Class="form-control floting" id="FsFolder" name="FsFolder" maxlength="250">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer" style="padding:0px;border:none;">
+                <button type="button" class="btn btn-black btn-rounded btn-md w-100 mt-2 mb-2 ml-2 mr-2" onclick="saveConfig();">Save</button>
+                <button type="button" class="btn btn-danger btn-popup-close" id="cmdclose_editConfig" data-dismiss="modal" style="display:none;"></button>
+            </div>
+        </div>
+    </div>
+</div>
+
